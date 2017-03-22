@@ -1,4 +1,4 @@
-
+#include "pitches.h"
 
 // Digital IO's
 int triggerPin             = 3;      // Push button for primary fire. Low = pressed
@@ -75,11 +75,13 @@ void setup() {
 
   digitalWrite(triggerPin, HIGH);      // Not really needed if your circuit has the correct pull up resistors already but doesn't harm
 
+ /*
   for (int i = 1;i < 254;i++) { // Loop plays start up noise
     analogWrite(ammoPin, i);
     playTone((3000-9*i), 2);
   }
-
+ */
+  johncena();
   // Next 4 lines initialise the display LEDs
   analogWrite(ammoPin, ((int) ammo));
   analogWrite(lifePin, ((int) life));
@@ -222,6 +224,8 @@ void playTone(int tone, int duration) { // A sub routine for playing tones like 
    digitalWrite(hitPin,LOW);
    delay (500);
   }
+
+  /*revive();*/
 }
 
 void noAmmo() { // Make some noise and flash some lights when out of ammo
@@ -234,7 +238,53 @@ void noAmmo() { // Make some noise and flash some lights when out of ammo
 void hit() { // Make some noise and flash some lights when you get shot
   digitalWrite(hitPin,HIGH);
   life = life - 1;
-  playTone(500, 500);
+  playTone(400, 200);
+  delay (10);
+  playTone(400, 200);
   if(life <= 0){dead();}
   digitalWrite(hitPin,LOW);
+  if(life >=1){
+    delay (1000);
+    playTone(2000, 100);
+    delay (1000);
+    playTone(2000, 100);
+    delay (1000);
+    playTone(1500, 100);
+  }
+}
+/*
+void revive() {
+  delay (5000);
+  johncena();
+  delay (5000);
+  life = 3;
+}*/
+
+void johncena() { // plays john cena song
+
+  // notes in the melody:
+  int melody[] = {
+    NOTE_A4, NOTE_B4, NOTE_G4, 0, NOTE_A4, 0,NOTE_C5, NOTE_B4, NOTE_G4, 0, NOTE_A4
+  };
+
+  // note durations: 4 = quarter note, 8 = eighth note, etc.:
+  int noteDurations[] = {
+    4, 6, 6, 8, 1, 4, 4, 6, 6, 8, 1
+  };
+  // iterate over the notes of the melody:
+  for (int thisNote = 0; thisNote < 11; thisNote++) {
+
+    // to calculate the note duration, take one second
+    // divided by the note type.
+    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+    int noteDuration = 1000 / noteDurations[thisNote];
+    tone(4, melody[thisNote], noteDuration);
+
+    // to distinguish the notes, set a minimum time between them.
+    // the note's duration + 30% seems to work well:
+    int pauseBetweenNotes = noteDuration * 1.30;
+    delay(pauseBetweenNotes);
+    // stop the tone playing:
+    noTone(4);
+  }
 }
