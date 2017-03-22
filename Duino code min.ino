@@ -12,7 +12,7 @@ int IRreceivePin           = 12;     // The pin that incoming IR signals are rea
 
 // Player and Game details
 int myTeamID               = 1;      // 1-7 (0 = system message)
-int myPlayerID             = 5;      // Player ID
+int myPlayerID             = 1;      // Player ID
 int myWeaponID             = 0;      // Deffined by gameType and configureGame subroutine.
 int myWeaponHP             = 0;      // Deffined by gameType and configureGame subroutine.
 int maxAmmo                = 0;      // Deffined by gameType and configureGame subroutine.
@@ -69,19 +69,17 @@ void setup() {
   pinMode(hitPin, OUTPUT);
   pinMode(IRtransmitPin, OUTPUT);
   pinMode(IRreceivePin, INPUT);
- 
+
   frequencyCalculations();   // Calculates pulse lengths etc for desired frequency
   configureGame();           // Look up and configure game details
-  tagCode();                 // Based on game details etc works out the data that will be transmitted when a shot is fired
- 
- 
+
   digitalWrite(triggerPin, HIGH);      // Not really needed if your circuit has the correct pull up resistors already but doesn't harm
- 
+
   for (int i = 1;i < 254;i++) { // Loop plays start up noise
     analogWrite(ammoPin, i);
     playTone((3000-9*i), 2);
-  } 
- 
+  }
+
   // Next 4 lines initialise the display LEDs
   analogWrite(ammoPin, ((int) ammo));
   analogWrite(lifePin, ((int) life));
@@ -92,27 +90,26 @@ void loop(){
   receiveIR();
   if(FIRE != 0){
     shoot();
+
   }
   triggers();
 }
 
 // SUB ROUTINES
-
 void receiveIR() { // Void checks for an incoming signal and decodes it if it sees one.
   int error = 0;
- 
+
   if(digitalRead(IRreceivePin) == LOW){    // If the receive pin is low a signal is being received.
     digitalWrite(hitPin,HIGH);
-	hit();
+  hit();
   }
 }
 
 void shoot() {
   if(FIRE == 1){ // Has the trigger been pressed?
-    playTone(2000, 250);
     sendPulse(IRtransmitPin, 4); // Transmit Header pulse, send pulse subroutine deals with the details
     delayMicroseconds(IRpulse);
- 
+
     for(int i = 0; i < 8; i++) { // Transmit Byte1
       if(byte1[i] == 1){
         sendPulse(IRtransmitPin, 1);
@@ -132,14 +129,14 @@ void shoot() {
       sendPulse(IRtransmitPin, 1);
       delayMicroseconds(IRpulse);
     }
-    
+
     if(myParity == 1){ // Parity
       sendPulse(IRtransmitPin, 1);
     }
     sendPulse(IRtransmitPin, 1);
     delayMicroseconds(IRpulse);
   }
-  
+
 FIRE = 0;
 ammo = ammo - 1;
 }
@@ -174,13 +171,13 @@ void triggers() { // Checks to see if the triggers have been presses
   }
   if(FIRE == 1){
     if(ammo < 1){FIRE = 0; noAmmo();}
-    if(life < 1){FIRE = 0; dead();}  
+    if(life < 1){FIRE = 0; dead();}
   }
- 
+
 }
 
 
-void configureGame() { 
+void configureGame() {
   myWeaponID = 1;
   maxAmmo = 30;
   ammo = 30;
@@ -191,44 +188,13 @@ void configureGame() {
 
 
 void frequencyCalculations() { // Works out all the timings needed to give the correct carrier frequency for the IR signal
-  IRt = (int) (500/IRfrequency);  
+  IRt = (int) (500/IRfrequency);
   IRpulses = (int) (IRpulse / (2*IRt));
   IRt = IRt - 4;
   // Why -4 I hear you cry. It allows for the time taken for commands to be executed.
   // More info: http://j44industries.blogspot.com/2009/09/arduino-frequency-generation.html#more
 
   timeOut = IRpulse + 50; // Adding 50 to the expected pulse time gives a little margin for error on the pulse read time out value
-}
-
-
-void tagCode() { // Works out what the players tagger code (the code that is transmitted when they shoot) is
-  byte1[0] = myTeamID >> 2 & B1;
-  byte1[1] = myTeamID >> 1 & B1;
-  byte1[2] = myTeamID >> 0 & B1;
-
-  byte1[3] = myPlayerID >> 4 & B1;
-  byte1[4] = myPlayerID >> 3 & B1;
-  byte1[5] = myPlayerID >> 2 & B1;
-  byte1[6] = myPlayerID >> 1 & B1;
-  byte1[7] = myPlayerID >> 0 & B1;
-
-
-  byte2[0] = myWeaponID >> 2 & B1;
-  byte2[1] = myWeaponID >> 1 & B1;
-  byte2[2] = myWeaponID >> 0 & B1;
-
-  byte2[3] = myWeaponHP >> 4 & B1;
-  byte2[4] = myWeaponHP >> 3 & B1;
-  byte2[5] = myWeaponHP >> 2 & B1;
-  byte2[6] = myWeaponHP >> 1 & B1;
-  byte2[7] = myWeaponHP >> 0 & B1;
-
-  myParity = 0;
-  for (int i=0; i<8; i++) {
-   if(byte1[i] == 1){myParity = myParity + 1;}
-   if(byte2[i] == 1){myParity = myParity + 1;}
-   myParity = myParity >> 0 & B1;
-  }
 }
 
 void playTone(int tone, int duration) { // A sub routine for playing tones like the standard arduino melody example
@@ -238,16 +204,16 @@ void playTone(int tone, int duration) { // A sub routine for playing tones like 
     digitalWrite(speakerPin, LOW);
     delayMicroseconds(tone);
   }
-  
+
 }void dead() { // void determines what the tagger does when it is out of lives
   // Makes a few noises and flashes some lights
   for (int i = 1;i < 254;i++) {
     analogWrite(ammoPin, i);
     playTone((1000+9*i), 2);
-  } 
+  }
   analogWrite(ammoPin, ((int) ammo));
   analogWrite(lifePin, ((int) life));
- 
+
   for (int i=0; i<10; i++) {
    analogWrite(ammoPin, 255);
    digitalWrite(hitPin,HIGH);
@@ -268,7 +234,7 @@ void noAmmo() { // Make some noise and flash some lights when out of ammo
 void hit() { // Make some noise and flash some lights when you get shot
   digitalWrite(hitPin,HIGH);
   life = life - 1;
-  playTone(2500, 1000);
+  playTone(500, 500);
   if(life <= 0){dead();}
   digitalWrite(hitPin,LOW);
 }
