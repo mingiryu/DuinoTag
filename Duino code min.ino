@@ -85,8 +85,6 @@ void setup() {
   // Next 4 lines initialise the display LEDs
   analogWrite(ammoPin, ((int) ammo));
   analogWrite(lifePin, ((int) life));
-  lifeDisplay();
-  ammoDisplay();
 }
 
 // Main loop most of the code is in the sub routines
@@ -94,29 +92,11 @@ void loop(){
   receiveIR();
   if(FIRE != 0){
     shoot();
-    ammoDisplay();
   }
   triggers();
 }
 
 // SUB ROUTINES
-
-void ammoDisplay() { // Updates Ammo LED output
-  float ammoF;
-  ammoF = (260/maxAmmo) * ammo;
-  if(ammoF <= 0){ammoF = 0;}
-  if(ammoF > 255){ammoF = 255;}
-  analogWrite(ammoPin, ((int) ammoF));
-}
-
-void lifeDisplay() { // Updates Ammo LED output
-  float lifeF;
-  lifeF = (260/maxLife) * life;
-  if(lifeF <= 0){lifeF = 0;}
-  if(lifeF > 255){lifeF = 255;}
-  analogWrite(lifePin, ((int) lifeF));
-} 
-
 
 void receiveIR() { // Void checks for an incoming signal and decodes it if it sees one.
   int error = 0;
@@ -129,6 +109,7 @@ void receiveIR() { // Void checks for an incoming signal and decodes it if it se
 
 void shoot() {
   if(FIRE == 1){ // Has the trigger been pressed?
+    playTone(2000, 250);
     sendPulse(IRtransmitPin, 4); // Transmit Header pulse, send pulse subroutine deals with the details
     delayMicroseconds(IRpulse);
  
@@ -286,11 +267,8 @@ void noAmmo() { // Make some noise and flash some lights when out of ammo
 
 void hit() { // Make some noise and flash some lights when you get shot
   digitalWrite(hitPin,HIGH);
-  life = life - hp[hitNo];
-  Serial.print("Life: ");
-  Serial.println(life);
-  playTone(500, 500);
+  life = life - 1;
+  playTone(2500, 1000);
   if(life <= 0){dead();}
   digitalWrite(hitPin,LOW);
-  lifeDisplay();
 }
