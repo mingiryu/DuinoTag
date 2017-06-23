@@ -1,4 +1,3 @@
 # Arduino
-Arduino based project
-
-Testing Ubuntu
+DuinoTag - Arduino based laser tag game system.
+Requires IRemote
