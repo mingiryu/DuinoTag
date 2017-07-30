@@ -36,7 +36,7 @@ void configure() {
 }
 
 void receiveIR() { // Receive IR signal and differenciate it
-  if (irrecv.decode(&results)) {
+  if (irrecv.decode(&results)) { // checks if it is decoded
     switch(results.value) {
       case 1641445511: // signal from remote
         Serial.println("Remote"); // print type of signal on monitor
@@ -60,8 +60,13 @@ void receiveIR() { // Receive IR signal and differenciate it
 }
 
 void hit() {
-  life = life - 1;
-  Serial.println("Current life" + life);
+  if(life == 0) {
+    Serial.println("Dead");
+  } else {
+    life = life - 1;
+    Serial.print("Current life: ");
+    Serial.println(life);
+  }
 }
 
 void trigger() { // recieve trigger signal and initiate shooting procedure
