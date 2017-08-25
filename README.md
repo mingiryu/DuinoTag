@@ -1,3 +1,4 @@
 # Arduino
+
 DuinoTag - Arduino based laser tag game system.
-Requires IRemote
+Requires IRemote: https://github.com/z3t0/Arduino-IRremote
