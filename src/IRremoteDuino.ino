@@ -44,24 +44,30 @@ void configure() {
 
 // Receive IR signal and differenciate it
 void receiveIR() {
+  double remote = 1641445511;
+  double longRemote = 4294967295;
+  double instructableGun = 3389625022;
   if (irrecv.decode(&results)) { // checks if it is decoded
-    switch(results.value) {
-      case 1641445511: // signal from remote
-        Serial.println("Remote"); // print type of signal on monitor
-        irrecv.resume(); // reinitialize the reciever
-        break;
-      case 4294967295: // remote (long press)
-        Serial.println("Remote (Long Press)");
-        irrecv.resume();
-        break;
-      case 3389625022: // gun
-        Serial.println("Gun");
-        irrecv.resume();
-        hit();
-        break;
-      default:
-        Serial.println(results.value); // decode the code if not registered
-        irrecv.resume();
+    if (results.decode_type == SONY){ // Checks for SONY
+      Serial.println("SONY");
+      irrev,resume();
+    }
+    else if (results.value == remote) { // remote
+      Serial.println("Remote"); // print type of signal on monitor
+      irrecv.resume(); // reinitialize the reciever
+    }
+    else if (results.value == longRemote) { // remote (long press)
+      Serial.println("Remote (Long Press)");
+      irrecv.resume();
+    }
+    else if (results.value == instructableGun) { // instructable gun
+      Serial.println("Gun");
+      irrecv.resume();
+      hit();
+    }
+    else {
+      Serial.println(results.value); // decode the code if not registered
+      irrecv.resume();
     }
   }
   delay(500); // To stop geting too much hit
@@ -89,7 +95,7 @@ void trigger() {
 }
 
 void shoot() {
-  irsend.sendSony(0xa90, 12);
+  irsend.sendSony(0xa90, 12); // send sony, not sure about the args(HEX, int)
   delay(40);
   playTone(400,200);
 }
