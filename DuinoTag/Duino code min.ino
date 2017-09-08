@@ -1,3 +1,7 @@
+/*
+This code is from instructable and have been modified to solve the LED issue.
+*/
+
 #include "pitches.h"
 
 // Digital IO's
@@ -71,7 +75,7 @@ void setup() {
   pinMode(IRreceivePin, INPUT);
 
   frequencyCalculations();   // Calculates pulse lengths etc for desired frequency
-  configureGame();           // Look up and configure game details
+  configure();
 
   digitalWrite(triggerPin, HIGH);      // Not really needed if your circuit has the correct pull up resistors already but doesn't harm
 
@@ -92,9 +96,16 @@ void loop(){
   receiveIR();
   if(FIRE != 0){
     shoot();
-
   }
   triggers();
+}
+
+void configure() {
+  myWeaponID = 1;
+  maxAmmo = 30;
+  ammo = 30;
+  maxLife = 3;
+  life = 3;
 }
 
 // SUB ROUTINES
@@ -168,26 +179,12 @@ void triggers() { // Checks to see if the triggers have been presses
   if(TR != LTR && TR == LOW){
     FIRE = 1;
   }
-  if(TR == LOW && automatic == 1){
-    FIRE = 1;
-  }
   if(FIRE == 1){
     if(ammo < 1){FIRE = 0; noAmmo();}
     if(life < 1){FIRE = 0; dead();}
   }
 
 }
-
-
-void configureGame() {
-  myWeaponID = 1;
-  maxAmmo = 30;
-  ammo = 30;
-  maxLife = 3;
-  life = 3;
-  myWeaponHP = 1;
-}
-
 
 void frequencyCalculations() { // Works out all the timings needed to give the correct carrier frequency for the IR signal
   IRt = (int) (500/IRfrequency);
@@ -199,15 +196,8 @@ void frequencyCalculations() { // Works out all the timings needed to give the c
   timeOut = IRpulse + 50; // Adding 50 to the expected pulse time gives a little margin for error on the pulse read time out value
 }
 
-void playTone(int tone, int duration) { // A sub routine for playing tones like the standard arduino melody example
-  for (long i = 0; i < duration * 1000L; i += tone * 2) {
-    digitalWrite(speakerPin, HIGH);
-    delayMicroseconds(tone);
-    digitalWrite(speakerPin, LOW);
-    delayMicroseconds(tone);
-  }
-
-}void dead() { // void determines what the tagger does when it is out of lives
+// void determines what the tagger does when it is out of lives
+void dead() {
   // Makes a few noises and flashes some lights
   for (int i = 1;i < 254;i++) {
     analogWrite(ammoPin, i);
@@ -225,24 +215,29 @@ void playTone(int tone, int duration) { // A sub routine for playing tones like 
    delay (500);
   }
 
-  /*revive();*/
 }
 
-void noAmmo() { // Make some noise and flash some lights when out of ammo
+// Make some noise and flash some lights when out of ammo
+void noAmmo() {
   digitalWrite(hitPin,HIGH);
   playTone(500, 100);
   playTone(1000, 100);
   digitalWrite(hitPin,LOW);
 }
 
-void hit() { // Make some noise and flash some lights when you get shot
+// Make some noise and flash some lights when you get shot
+void hit() {
   digitalWrite(hitPin,HIGH);
   life = life - 1;
+  // Make sound to indicate hit
   playTone(400, 200);
   delay (10);
   playTone(400, 200);
-  if(life <= 0){dead();}
+  if(life <= 0){
+    dead();
+  }
   digitalWrite(hitPin,LOW);
+  // make sound for immune status
   if(life >=1){
     delay (1000);
     playTone(2000, 100);
@@ -252,15 +247,19 @@ void hit() { // Make some noise and flash some lights when you get shot
     playTone(1500, 100);
   }
 }
-/*
-void revive() {
-  delay (5000);
-  johncena();
-  delay (5000);
-  life = 3;
-}*/
 
-void johncena() { // plays john cena song
+// Standard sound generator for peizo
+void playTone(int tone, int duration) {
+  for (long i = 0; i < duration * 1000L; i += tone * 2) {
+    digitalWrite(speakerPin, HIGH);
+    delayMicroseconds(tone);
+    digitalWrite(speakerPin, LOW);
+    delayMicroseconds(tone);
+  }
+}
+
+// plays john cena song
+void johncena() {
 
   // notes in the melody:
   int melody[] = {
