@@ -2,7 +2,7 @@
 Arduino based laser tag game system.
 ## Overview
 ```sh
-Requires IRemote: https://github.com/z3t0/Arduino-IRremote
+Requires IRremote: https://github.com/z3t0/Arduino-IRremote
 Modified from http://www.instructables.com/id/Duino-Tagger/
 ```
 
@@ -11,16 +11,18 @@ Modified from http://www.instructables.com/id/Duino-Tagger/
 - Lens to focus IR beam
 
 **Sound**
-- Peizo Sounder to provide audio feeback and sound effects
+- Piezo Sounder to provide audio feedback and sound effects
 
 **Receivers**
-- Standard IR reciever module and power regulation capacitor to provide signal feedback system
+- Standard IR receiver module and power regulation capacitor to provide signal feedback system
 ## Material
-- Arduino Mini
+- Arduino nano
 - Light Gun
 - Colored LEDs (+30mA)
 - IR Sensors
 - 2x IR LED's (+100mA)
-- Peizo Sounder
+- Piezo Sounder
 - Power Transistor /MOSFET
 - Solder, Resistors, Capacitors, etc
+
+Added Pat

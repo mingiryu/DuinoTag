@@ -1,3 +1,7 @@
+/*
+This code is from instructable and have been modified to solve the LED issue.
+*/
+
 #include "pitches.h"
 
 // Digital IO's
@@ -259,6 +263,13 @@ void revive() {
   delay (5000);
   life = 3;
 }*/
+
+
+/*
+------------------------------------------
+Melody
+------------------------------------------
+*/
 
 void johncena() { // plays john cena song
 
