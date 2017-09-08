@@ -11,10 +11,11 @@ IRsend irsend;
 int triggerPin = 2; // trigger for firing
 int speakerPin = 4; // Peizo Sounder
 int hitPin = 7; //LED output used to indicated when the player is hit
+int ammoPin = 6;
 
 
 // Player Status
-int ammo = 0; // Current ammo, initialised in configue()
+double ammo = 0; // Current ammo, initialised in configue()
 int life = 0; // Current life, initialised in configue()
 int TR = 0; // Trigger reading, used for trigger()
 int LTR = 0; // Last trigger reading, used for trigger()
@@ -27,6 +28,8 @@ void setup() {
   pinMode(triggerPin, INPUT_PULLUP);
   pinMode(speakerPin, OUTPUT);
   pinMode(hitPin, OUTPUT);
+  pinMode(ammoPin, OUTPUT);
+  analogWrite(ammoPin,255);
 
   configure();
   Serial.println("Configured");
@@ -72,7 +75,12 @@ void hit() {
   } else {
     life = life - 1;
     Serial.println(life);
+    digitalWrite(hitPin, HIGH);
     playTone(400, 200);
+    delay(200);
+    digitalWrite(hitPin, LOW);
+    
+    
   }
 }
 
@@ -82,8 +90,14 @@ void trigger() {
   TR = digitalRead(triggerPin);
   if(TR != LTR && TR == LOW){ // checks if trigger is in right condition
     if(ammo > 0 && life > 0) { // checks for player status
-      irsend.sendSony(0xa90, 12); // send sony, not sure about the args(HEX, int)
+      for (int i = 0; i<4; i++)
+      {
+        irsend.sendSony(0xa90, 12); // send sony, not sure about the args(HEX, int)
+        delay(5);
+      }
+      
       ammo--;
+      analogWrite(ammoPin, (ammo/30.0)*255);
       delay(40);
       playTone(400,200);
       irrecv.enableIRIn();
