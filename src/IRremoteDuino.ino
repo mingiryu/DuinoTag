@@ -1,15 +1,14 @@
 #include <IRremote.h>
-#include "pitches.h"
 
 // IRremote Setting
-int RECV_PIN = 11;
+int RECV_PIN = 12;
 IRrecv irrecv(RECV_PIN);
 decode_results results;
 
 IRsend irsend;
 
 // Digital Input & Output
-int triggerPin = 3; // trigger for firing
+int triggerPin = 2; // trigger for firing
 int speakerPin = 4; // Peizo Sounder
 int hitPin = 7; //LED output used to indicated when the player is hit
 
@@ -25,60 +24,54 @@ void setup() {
   irrecv.enableIRIn(); // Start the receiver
   //need the transmitter
 
-  pinMode(triggerPin, INPUT);
+  pinMode(triggerPin, INPUT_PULLUP);
   pinMode(speakerPin, OUTPUT);
   pinMode(hitPin, OUTPUT);
 
   configure();
+  Serial.println("Configured");
+  playTone(400,200);
 }
 
 void loop() {
   receiveIR();
+  //delay(10);
   trigger();
+  //delay(10);
 }
 
 void configure() {
   ammo = 30;
-  life = 3;
+  life = 30;
 }
 
 // Receive IR signal and differenciate it
-void receiveIR() {
-  double remote = 1641445511;
-  double longRemote = 4294967295;
-  double instructableGun = 3389625022;
+void receiveIR() { // Receive IR signal and differenciate it
   if (irrecv.decode(&results)) { // checks if it is decoded
-    if (results.decode_type == SONY){ // Checks for SONY
-      Serial.println("SONY");
-      irrev,resume();
-    }
-    else if (results.value == remote) { // remote
-      Serial.println("Remote"); // print type of signal on monitor
-      irrecv.resume(); // reinitialize the reciever
-    }
-    else if (results.value == longRemote) { // remote (long press)
-      Serial.println("Remote (Long Press)");
-      irrecv.resume();
-    }
-    else if (results.value == instructableGun) { // instructable gun
-      Serial.println("Gun");
-      irrecv.resume();
-      hit();
-    }
-    else {
-      Serial.println(results.value); // decode the code if not registered
-      irrecv.resume();
+    switch(results.value) {
+      case 2704:
+        Serial.println("SONY");
+        irrecv.resume();
+        hit();
+        break;
+      default:
+        Serial.println(results.value); // decode the code if not registered
+        irrecv.resume();
     }
   }
-  delay(500); // To stop geting too much hit
+
+  delay(50); // To stop geting too much hit
 }
 
 void hit() {
   if(life == 0) {
     Serial.println("Dead");
+    for (int i = 1;i < 254;i++) {
+      playTone((1000+9*i), 2);
+    }
   } else {
     life = life - 1;
-    Serial.println("Current life: " + life);
+    Serial.println(life);
     playTone(400, 200);
   }
 }
@@ -89,15 +82,13 @@ void trigger() {
   TR = digitalRead(triggerPin);
   if(TR != LTR && TR == LOW){ // checks if trigger is in right condition
     if(ammo > 0 && life > 0) { // checks for player status
-      shoot(); // intiate shooting
+      irsend.sendSony(0xa90, 12); // send sony, not sure about the args(HEX, int)
+      ammo--;
+      delay(40);
+      playTone(400,200);
+      irrecv.enableIRIn();
     }
   }
-}
-
-void shoot() {
-  irsend.sendSony(0xa90, 12); // send sony, not sure about the args(HEX, int)
-  delay(40);
-  playTone(400,200);
 }
 
 // Standard sound generator for peizo
@@ -107,4 +98,5 @@ void playTone(int tone, int duration) {
     delayMicroseconds(tone);
     digitalWrite(speakerPin, LOW);
     delayMicroseconds(tone);
+  }
 }
