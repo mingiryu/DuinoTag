@@ -24,3 +24,5 @@ Modified from http://www.instructables.com/id/Duino-Tagger/
 - Piezo Sounder
 - Power Transistor /MOSFET
 - Solder, Resistors, Capacitors, etc
+
+Added Pat
