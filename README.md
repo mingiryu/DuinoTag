@@ -1,10 +1,10 @@
 # DuinoTag
 Arduino based laser tag game system.
 ## Overview
-```sh
 Requires IRremote: https://github.com/z3t0/Arduino-IRremote
+
 Modified from http://www.instructables.com/id/Duino-Tagger/
-```
+
 
 **IR Transmitter System**
 - Transistor amplifier to power up the high power IR LED
@@ -15,6 +15,7 @@ Modified from http://www.instructables.com/id/Duino-Tagger/
 
 **Receivers**
 - Standard IR receiver module and power regulation capacitor to provide signal feedback system
+
 ## Material
 - Arduino nano
 - Light Gun
@@ -25,4 +26,8 @@ Modified from http://www.instructables.com/id/Duino-Tagger/
 - Power Transistor /MOSFET
 - Solder, Resistors, Capacitors, etc
 
-Added Pat
+# IRremote Installation
+- Rename "Arduino-IRremote" to "IRremote"
+- Move the "IRremote" folder to Arduino_Root/libraries/
+- Remove RobotIRremote from Arduino_Root/libraries/
+- Send Pin for Arduino Nano is 3, 9
