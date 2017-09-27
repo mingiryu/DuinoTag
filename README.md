@@ -5,6 +5,12 @@ Requires IRremote: https://github.com/z3t0/Arduino-IRremote
 
 Modified from http://www.instructables.com/id/Duino-Tagger/
 
+<img src="/pic/IMG_0002.JPG" alt="pic" width="600">
+<img src="/pic/IMG_0003.JPG" alt="pic" width="600">
+<img src="/pic/IMG_0008.JPG" alt="pic" width="600">
+<img src="/pic/IMG_0009.JPG" alt="pic" width="600">
+
+
 
 **IR Transmitter System**
 - Transistor amplifier to power up the high power IR LED
@@ -25,6 +31,7 @@ Modified from http://www.instructables.com/id/Duino-Tagger/
 - Piezo Sounder
 - Power Transistor /MOSFET
 - Solder, Resistors, Capacitors, etc
+- Vibration module
 
 # IRremote Installation
 - Rename "Arduino-IRremote" to "IRremote"
