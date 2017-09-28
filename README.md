@@ -6,7 +6,7 @@ Requires IRremote: https://github.com/z3t0/Arduino-IRremote
 Modified from http://www.instructables.com/id/Duino-Tagger/
 
 
-**IR Transmitter System**
+**IR Transmitter System*
 - Transistor amplifier to power up the high power IR LED
 - Lens to focus IR beam
 
