@@ -6,10 +6,9 @@ Requires IRremote: https://github.com/z3t0/Arduino-IRremote
 Modified from http://www.instructables.com/id/Duino-Tagger/
 
 <img src="/pic/IMG_0002.JPG" alt="pic" style="width: 200px;"/>
-![pic](/pic/IMG_0002.JPG)
-![pic](/pic/IMG_0003.JPG)
-![pic](/pic/IMG_0008.JPG)
-![pic](/pic/IMG_0009.JPG)
+<img src="/pic/IMG_0003.JPG" alt="pic" style="width: 200px;"/>
+<img src="/pic/IMG_0008.JPG" alt="pic" style="width: 200px;"/>
+<img src="/pic/IMG_0009.JPG" alt="pic" style="width: 200px;"/>
 
 **IR Transmitter System**
 - Transistor amplifier to power up the high power IR LED
