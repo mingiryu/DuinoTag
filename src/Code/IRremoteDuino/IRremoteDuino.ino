@@ -42,8 +42,8 @@ void loop() {
 
 // teamNumber: 0 = Sony, 1 = Panasonic
 void configure() {
-    currentAmmo = 30;
-    currentLife = 30;
+    currentAmmo = 10;
+    currentLife = 10;
     teamNumber = 0;
 }
 
@@ -98,6 +98,8 @@ void checkTriggerStatus() {
     if(triggerReading != lastTriggerReading && triggerReading == LOW) {
         if(currentAmmo > 0 && currentLife > 0) {
             shoot();
+        } else if (currentAmmo <= 0 && currentLife > 0) {
+            reload();
         }
     }
 }
@@ -123,6 +125,14 @@ void shoot() {
     delay(40);
     playTone(400,200);
     irrecv.enableIRIn(); // IReciever needs to be started again after shooting
+}
+
+void reload() {
+  for (int i = 1;i < 254;i++) {
+      playTone((1000+9*i), 2);
+  }
+  delay(40);
+  currentAmmo = 10;
 }
 
 // Standard sound generator for peizo
