@@ -1,14 +1,14 @@
 # DuinoTag
 Arduino based laser tag game system.
+<img src="/pic/IMG_0145.JPG" alt="pic" width="600">
+<img src="/pic/IMG_0146.JPG" alt="pic" width="600">
 ## Overview
-Requires IRremote: https://github.com/z3t0/Arduino-IRremote
+- Requires IRremote: https://github.com/z3t0/Arduino-IRremote
+- Modified from http://www.instructables.com/id/Duino-Tagger/
 
-Modified from http://www.instructables.com/id/Duino-Tagger/
+**Schematic**
 
-<img src="/pic/IMG_0002.JPG" alt="pic" width="600">
-<img src="/pic/IMG_0003.JPG" alt="pic" width="600">
-<img src="/pic/IMG_0008.JPG" alt="pic" width="600">
-<img src="/pic/IMG_0009.JPG" alt="pic" width="600">
+<img src="/pic/Schematic.png" alt="pic" width="600">
 
 
 
@@ -16,8 +16,9 @@ Modified from http://www.instructables.com/id/Duino-Tagger/
 - Transistor amplifier to power up the high power IR LED
 - Lens to focus IR beam
 
-**Sound**
+**Feedback System**
 - Piezo Sounder to provide audio feedback and sound effects
+- Vibration module to provide physical feedback
 
 **Receivers**
 - Standard IR receiver module and power regulation capacitor to provide signal feedback system

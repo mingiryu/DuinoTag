@@ -128,7 +128,7 @@ void shoot() {
 }
 
 void reload() {
-  for (int i = 1;i < 254;i++) {
+  for (int i = 254;i < 1;i--) {
       playTone((1000+9*i), 2);
   }
   delay(40);
