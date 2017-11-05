@@ -1,12 +1,10 @@
 # DuinoTag
 Arduino based laser tag game system.
-## Overview
-Requires IRremote: https://github.com/z3t0/Arduino-IRremote
-
-Modified from http://www.instructables.com/id/Duino-Tagger/
-
 <img src="/pic/IMG_0145.JPG" alt="pic" width="600">
 <img src="/pic/IMG_0146.JPG" alt="pic" width="600">
+## Overview
+- Requires IRremote: https://github.com/z3t0/Arduino-IRremote
+- Modified from http://www.instructables.com/id/Duino-Tagger/
 
 **Schematic**
 
