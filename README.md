@@ -1,5 +1,6 @@
 # DuinoTag
 Arduino based laser tag game system.
+
 <img src="/pic/IMG_0145.JPG" alt="pic" width="600">
 <img src="/pic/IMG_0146.JPG" alt="pic" width="600">
 
@@ -16,7 +17,6 @@ Arduino based laser tag game system.
 
 **IR Transmitter System**
 - Transistor amplifier to power up the high power IR LED
-- Lens to focus IR beam
 
 **Feedback System**
 - Piezo Sounder to provide audio feedback and sound effects
@@ -32,7 +32,7 @@ Arduino based laser tag game system.
 - IR Sensors
 - 2x IR LED's (+100mA)
 - Piezo Sounder
-- Power Transistor /MOSFET
+- Power Transistor (MOSFET)
 - Solder, Resistors, Capacitors, etc
 - Vibration module
 

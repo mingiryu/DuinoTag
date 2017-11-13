@@ -11,6 +11,7 @@ int triggerPin = 2; // Trigger for firing
 int speakerPin = 4; // Peizo Sounder
 int hitPin = 7; // LED output used to indicated when the player is hit
 int ammoPin = 6; // LED output for indicating remaining ammo
+int motorPin = 10; // Vibrating motor output for physical feedback
 
 // Game Attributes
 double currentAmmo = 0.0;
@@ -84,9 +85,11 @@ void playerHit(int typeOfSignal) {
             currentLife--;
             Serial.println("Remaining life: " + currentLife);
             digitalWrite(hitPin, HIGH);
+            digitalWrite(motorPin, HIGH);
             playTone(400, 200);
             delay(200);
             digitalWrite(hitPin, LOW);
+            digitalWrite(motorPin, LOW);
         }
     }
 }
