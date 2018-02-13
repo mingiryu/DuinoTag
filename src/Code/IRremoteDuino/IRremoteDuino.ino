@@ -11,13 +11,17 @@ int triggerPin = 2; // Trigger for firing
 int speakerPin = 4; // Peizo Sounder
 int hitPin = 7; // LED output used to indicated when the player is hit
 int ammoPin = 6; // LED output for indicating remaining ammo
+int lifePin = 5;
+int motorPin = 10; // Vibrating motor output for physical feedback
 
 // Game Attributes
-double currentAmmo = 0.0;
-int currentLife = 0;
+int currentAmmo = 0.0;
+int currentLife = 0.0;
+double maxLife =0.0;
 int triggerReading = 0;
 int lastTriggerReading = 0;
 int teamNumber = 0;
+double maxAmmo = 0.0;
 
 void setup() {
     Serial.begin(9600);
@@ -26,9 +30,12 @@ void setup() {
     // pin configuration
     pinMode(triggerPin, INPUT_PULLUP);
     pinMode(speakerPin, OUTPUT);
+    pinMode(speakerPin, OUTPUT);
     pinMode(hitPin, OUTPUT);
     pinMode(ammoPin, OUTPUT);
+    pinMode(motorPin, OUTPUT);
     analogWrite(ammoPin,255);
+    digitalWrite(motorPin,LOW);
     
     configure();
     Serial.println("Configured");
@@ -38,10 +45,13 @@ void setup() {
 void loop() {
     receiveIR();
     checkTriggerStatus();
+    analogWrite(lifePin,((currentLife/maxLife)*255));
 }
 
 // teamNumber: 0 = Sony, 1 = Panasonic
 void configure() {
+    maxAmmo = 10;
+    maxLife = 10;
     currentAmmo = 10;
     currentLife = 10;
     teamNumber = 0;
@@ -49,22 +59,22 @@ void configure() {
 
 // Receive IR signal and differenciate it
 void receiveIR() {
+  
     if (irrecv.decode(&results)) {
         switch(results.value) {
             case 2704: // Sony
                 Serial.println("SONY");
-                irrecv.resume();
-                playerHit(0);
+                //playerHit(0);
                 break;
-            case 1111: // Panasonic, 1111 is a placeholder number
+            case 4294967295: // Panasonic, 1111 is a placeholder number
                 Serial.println("Panasonic");
-                irrecv.resume();
-                playerHit(1);
+                playerHit(4294967295);
                 break;
             default:
                 Serial.println(results.value); // decode the code if not registered
-                irrecv.resume();
+                
         }
+        irrecv.resume();
     }
     
     delay(50); // To stop geting too much hit
@@ -75,18 +85,22 @@ void playerHit(int typeOfSignal) {
     if (teamNumber == typeOfSignal) {
         Serial.println("Signal from same team");
     } else {
-        if (currentLife == 0) {
+        if (currentLife == 1) {
             Serial.println("Player is Dead");
             for (int i = 1;i < 254;i++) {
                 playTone((1000+9*i), 2);
             }
         } else {
             currentLife--;
-            Serial.println("Remaining life: " + currentLife);
+            Serial.println("Remaining life: ");
+             Serial.println(currentLife);
             digitalWrite(hitPin, HIGH);
+            digitalWrite(motorPin, HIGH);
             playTone(400, 200);
             delay(200);
             digitalWrite(hitPin, LOW);
+            digitalWrite(motorPin, LOW);
+            delay(50);
         }
     }
 }
@@ -106,6 +120,7 @@ void checkTriggerStatus() {
 
 // Send Sony or Panasonic remote signal depending on teamNumber
 void shoot() {
+   Serial.println("SHOT");
     for (int i = 0; i<4; i++) {
         switch(teamNumber) {
             case 0: // Sony
@@ -121,7 +136,7 @@ void shoot() {
         }
     }
     currentAmmo--;
-    analogWrite(ammoPin, (currentAmmo/30.0)*255);
+    analogWrite(ammoPin, (currentAmmo/maxAmmo)*255);
     delay(40);
     playTone(400,200);
     irrecv.enableIRIn(); // IReciever needs to be started again after shooting

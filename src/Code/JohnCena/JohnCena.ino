@@ -28,15 +28,17 @@ void johnCena() { // plays john cena song
 
   // notes in the melody:
   int melody[] = {
+    NOTE_A4, NOTE_B4, NOTE_G4, 0, NOTE_A4, 0,NOTE_C5, NOTE_B4, NOTE_G4, 0, NOTE_A4,
     NOTE_A4, NOTE_B4, NOTE_G4, 0, NOTE_A4, 0,NOTE_C5, NOTE_B4, NOTE_G4, 0, NOTE_A4
   };
 
   // note durations: 4 = quarter note, 8 = eighth note, etc.:
   int noteDurations[] = {
+    4, 6, 6, 8, 1, 4, 4, 6, 6, 8, 1,
     4, 6, 6, 8, 1, 4, 4, 6, 6, 8, 1
   };
   // iterate over the notes of the melody:
-  for (int thisNote = 0; thisNote < 11; thisNote++) {
+  for (int thisNote = 0; thisNote < 22; thisNote++) {
 
     // to calculate the note duration, take one second
     // divided by the note type.

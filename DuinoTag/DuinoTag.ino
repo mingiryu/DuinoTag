@@ -1,9 +1,9 @@
-#include <IRremote.h>
+#include <IRremote.h> // Needs to be installed in local Arduino Library
 #include <NewTone.h> // Required for compatibility with IRremote
-#include "pitches.h"
+#include "pitches.h" // For Peizo Sounder Melody
 
 // IRremote Setting
-int RECV_PIN = 12;
+int RECV_PIN = 12; // IR receiver
 IRrecv irrecv(RECV_PIN);
 decode_results results;
 IRsend irsend;
@@ -13,8 +13,9 @@ int triggerPin = 2; // Trigger for firing
 int speakerPin = 4; // Peizo Sounder
 int hitPin = 7; // LED output used to indicated when the player is hit
 int ammoPin = 6; // LED output for indicating remaining ammo
+int motorPin = 10; // Vibrating motor output for physical feedback
 
-// Game Attributes
+// Game Attributes (Modify configure() to change teamNumber, ammo, and life values)
 double currentAmmo = 0.0;
 int currentLife = 0;
 int triggerReading = 0;
@@ -32,13 +33,12 @@ void setup() {
     pinMode(ammoPin, OUTPUT);
     analogWrite(ammoPin,255);
     
-    configure();
-    Serial.println("Configured");
-    // playTone(400,200);
-    // Play John Cena Melody
-    johnCena();
+    configure(); // Configures player stats and team number
+    Serial.println("Configured"); // For debugging purpose
+    startTeam(); // Plays team specific melody
 }
 
+// Regularly checks IR signal and trigger status
 void loop() {
     receiveIR();
     checkTriggerStatus();
@@ -48,14 +48,23 @@ void loop() {
 void configure() {
     currentAmmo = 10;
     currentLife = 10;
-    teamNumber = 0;
+    teamNumber = 1; // This needs to be manually changed in order to specify different team number
+}
+
+// Different team plays different melodies
+void startTeam() {
+  if (teamNumber == 0) {
+    johnCena();
+  } else {
+    turnDownForWhat();
+  }
 }
 
 // Receive IR signal and differenciate it
 void receiveIR() {
     if (irrecv.decode(&results)) {
         switch(results.value) {
-            case 2704: // Sony
+            case 2704: // Sony, 2704 is a placeholder number
                 Serial.println("SONY");
                 irrecv.resume();
                 playerHit(0);
@@ -66,7 +75,7 @@ void receiveIR() {
                 playerHit(1);
                 break;
             default:
-                Serial.println(results.value); // decode the code if not registered
+                Serial.println(results.value); // decode the code and display the code, if not registered
                 irrecv.resume();
         }
     }
@@ -77,20 +86,24 @@ void receiveIR() {
 // Update value of currentLife and make noise after being hit
 void playerHit(int typeOfSignal) {
     if (teamNumber == typeOfSignal) {
-        Serial.println("Signal from same team");
+        Serial.println("Signal from same team"); // For debuggin purpose
     } else {
         if (currentLife == 0) {
-            Serial.println("Player is Dead");
+            Serial.println("Player is Dead"); // For debuggin purpose
+            // Plays death melody
             for (int i = 1;i < 254;i++) {
                 playTone((1000+9*i), 2);
             }
         } else {
+            // subtract 1 life and reconfigure the pins
             currentLife--;
-            Serial.println("Remaining life: " + currentLife);
+            Serial.println("Remaining life: " + currentLife); // For debuggin purpose
             digitalWrite(hitPin, HIGH);
+            digitalWrite(motorPin, HIGH);
             playTone(400, 200);
             delay(200);
             digitalWrite(hitPin, LOW);
+            digitalWrite(motorPin, LOW);
         }
     }
 }
@@ -131,6 +144,7 @@ void shoot() {
     irrecv.enableIRIn(); // IReciever needs to be started again after shooting
 }
 
+// reload currentAmmo
 void reload() {
   for (int i = 254;i < 1;i--) {
       playTone((1000+9*i), 2);
@@ -160,15 +174,64 @@ void johnCena() { // plays john cena song
 
   // notes in the melody:
   int melody[] = {
+    NOTE_A4, NOTE_B4, NOTE_G4, 0, NOTE_A4, 0,NOTE_C5, NOTE_B4, NOTE_G4, 0, NOTE_A4,
     NOTE_A4, NOTE_B4, NOTE_G4, 0, NOTE_A4, 0,NOTE_C5, NOTE_B4, NOTE_G4, 0, NOTE_A4
   };
 
   // note durations: 4 = quarter note, 8 = eighth note, etc.:
   int noteDurations[] = {
+    4, 6, 6, 8, 1, 4, 4, 6, 6, 8, 1,
     4, 6, 6, 8, 1, 4, 4, 6, 6, 8, 1
   };
   // iterate over the notes of the melody:
-  for (int thisNote = 0; thisNote < 11; thisNote++) {
+  for (int thisNote = 0; thisNote < 22; thisNote++) {
+
+    // to calculate the note duration, take one second
+    // divided by the note type.
+    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+    int noteDuration = 1000 / noteDurations[thisNote];
+    NewTone(4, melody[thisNote], noteDuration);
+
+    // to distinguish the notes, set a minimum time between them.
+    // the note's duration + 30% seems to work well:
+    int pauseBetweenNotes = noteDuration * 1.30;
+    delay(pauseBetweenNotes);
+    // stop the tone playing:
+    noNewTone(4);
+  }
+}
+
+
+/*
+ turnDownForwhat
+ Plays a melody of Turn Down For What
+ circuit:
+ * 8-ohm speaker on digital pin 4
+ */
+void turnDownForWhat() {
+
+  // notes in the melody:
+  int melody[] = {
+    0      , 0      , NOTE_E5, NOTE_E5, NOTE_E5, NOTE_E5,
+
+    NOTE_E5, NOTE_E5, NOTE_C5, NOTE_B4, NOTE_B4, NOTE_C5, NOTE_E3, 0,
+    NOTE_E5, NOTE_E5, NOTE_C5, NOTE_B4, NOTE_B4, NOTE_C5, NOTE_E3, 0,
+
+    NOTE_E4, NOTE_E4, NOTE_C4, NOTE_B3, NOTE_B3, NOTE_C4, NOTE_E2, 0,
+    NOTE_E4, NOTE_E4, NOTE_C4, NOTE_B3, NOTE_B3, NOTE_C4, NOTE_E2, 0,
+  };
+  // note durations: 4 = quarter note, 8 = eighth note, etc.:
+  int noteDurations[] = {
+    1, 4, 4, 4, 8, 8,
+
+    4, 8, 4, 4, 8, 4, 4, 8,
+    4, 8, 4, 4, 8, 4, 4, 8,
+
+    4, 8, 4, 4, 8, 4, 4, 8,
+    4, 8, 4, 4, 8, 4, 4, 8,
+    };
+  // iterate over the notes of the melody:
+  for (int thisNote = 0; thisNote < 38; thisNote++) {
 
     // to calculate the note duration, take one second
     // divided by the note type.
