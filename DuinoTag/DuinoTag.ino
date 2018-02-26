@@ -13,11 +13,12 @@ int triggerPin = 2; // Trigger for firing
 int speakerPin = 4; // Peizo Sounder
 int hitPin = 7; // LED output used to indicated when the player is hit
 int ammoPin = 6; // LED output for indicating remaining ammo
+int lifePin = 5; // LED output for indicating remaining life
 int motorPin = 10; // Vibrating motor output for physical feedback
 
 // Game Attributes (Modify configure() to change teamNumber, ammo, and life values)
 double currentAmmo = 0.0;
-int currentLife = 0;
+double currentLife = 0.0;
 int triggerReading = 0;
 int lastTriggerReading = 0;
 int teamNumber = 0;
@@ -31,7 +32,9 @@ void setup() {
     pinMode(speakerPin, OUTPUT);
     pinMode(hitPin, OUTPUT);
     pinMode(ammoPin, OUTPUT);
+    pinMode(lifePin, OUTPUT);
     analogWrite(ammoPin,255);
+    analogWrite(lifePin,255);
     
     configure(); // Configures player stats and team number
     Serial.println("Configured"); // For debugging purpose
@@ -54,9 +57,13 @@ void configure() {
 // Different team plays different melodies
 void startTeam() {
   if (teamNumber == 0) {
-    johnCena();
+      for (int i = 1;i < 254;i++) {
+          playTone((300+9*(i/2)), 2); // This probably won't sound good, need to fiddle with it
+      }
   } else {
-    turnDownForWhat();
+      for (int i = 1;i < 254;i++) {
+          playTone((500+9*(i/2)), 2); // This too
+      }
   }
 }
 
@@ -97,6 +104,7 @@ void playerHit(int typeOfSignal) {
         } else {
             // subtract 1 life and reconfigure the pins
             currentLife--;
+            analogWrite(lifePin, (currentLife/30.0)*255);
             Serial.println("Remaining life: " + currentLife); // For debuggin purpose
             digitalWrite(hitPin, HIGH);
             digitalWrite(motorPin, HIGH);
@@ -161,89 +169,4 @@ void playTone(int tone, int duration) {
         digitalWrite(speakerPin, LOW);
         delayMicroseconds(tone);
     }
-}
-
-
-/*
- johnCenaMelody
- Plays a melody of John Cena Entrance Song
- circuit:
- * 8-ohm speaker on digital pin 4
- */
-void johnCena() { // plays john cena song
-
-  // notes in the melody:
-  int melody[] = {
-    NOTE_A4, NOTE_B4, NOTE_G4, 0, NOTE_A4, 0,NOTE_C5, NOTE_B4, NOTE_G4, 0, NOTE_A4,
-    NOTE_A4, NOTE_B4, NOTE_G4, 0, NOTE_A4, 0,NOTE_C5, NOTE_B4, NOTE_G4, 0, NOTE_A4
-  };
-
-  // note durations: 4 = quarter note, 8 = eighth note, etc.:
-  int noteDurations[] = {
-    4, 6, 6, 8, 1, 4, 4, 6, 6, 8, 1,
-    4, 6, 6, 8, 1, 4, 4, 6, 6, 8, 1
-  };
-  // iterate over the notes of the melody:
-  for (int thisNote = 0; thisNote < 22; thisNote++) {
-
-    // to calculate the note duration, take one second
-    // divided by the note type.
-    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-    int noteDuration = 1000 / noteDurations[thisNote];
-    NewTone(4, melody[thisNote], noteDuration);
-
-    // to distinguish the notes, set a minimum time between them.
-    // the note's duration + 30% seems to work well:
-    int pauseBetweenNotes = noteDuration * 1.30;
-    delay(pauseBetweenNotes);
-    // stop the tone playing:
-    noNewTone(4);
-  }
-}
-
-
-/*
- turnDownForwhat
- Plays a melody of Turn Down For What
- circuit:
- * 8-ohm speaker on digital pin 4
- */
-void turnDownForWhat() {
-
-  // notes in the melody:
-  int melody[] = {
-    0      , 0      , NOTE_E5, NOTE_E5, NOTE_E5, NOTE_E5,
-
-    NOTE_E5, NOTE_E5, NOTE_C5, NOTE_B4, NOTE_B4, NOTE_C5, NOTE_E3, 0,
-    NOTE_E5, NOTE_E5, NOTE_C5, NOTE_B4, NOTE_B4, NOTE_C5, NOTE_E3, 0,
-
-    NOTE_E4, NOTE_E4, NOTE_C4, NOTE_B3, NOTE_B3, NOTE_C4, NOTE_E2, 0,
-    NOTE_E4, NOTE_E4, NOTE_C4, NOTE_B3, NOTE_B3, NOTE_C4, NOTE_E2, 0,
-  };
-  // note durations: 4 = quarter note, 8 = eighth note, etc.:
-  int noteDurations[] = {
-    1, 4, 4, 4, 8, 8,
-
-    4, 8, 4, 4, 8, 4, 4, 8,
-    4, 8, 4, 4, 8, 4, 4, 8,
-
-    4, 8, 4, 4, 8, 4, 4, 8,
-    4, 8, 4, 4, 8, 4, 4, 8,
-    };
-  // iterate over the notes of the melody:
-  for (int thisNote = 0; thisNote < 38; thisNote++) {
-
-    // to calculate the note duration, take one second
-    // divided by the note type.
-    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-    int noteDuration = 1000 / noteDurations[thisNote];
-    NewTone(4, melody[thisNote], noteDuration);
-
-    // to distinguish the notes, set a minimum time between them.
-    // the note's duration + 30% seems to work well:
-    int pauseBetweenNotes = noteDuration * 1.30;
-    delay(pauseBetweenNotes);
-    // stop the tone playing:
-    noNewTone(4);
-  }
 }
