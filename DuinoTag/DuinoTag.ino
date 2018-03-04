@@ -1,6 +1,5 @@
-#include <IRremote.h> // Needs to be installed in local Arduino Library
+#include <IRremote.h> // Required for IR system
 #include <NewTone.h> // Required for compatibility with IRremote
-#include "pitches.h" // For Peizo Sounder Melody
 
 // IRremote Setting
 int RECV_PIN = 12; // IR receiver
@@ -14,9 +13,9 @@ int speakerPin = 4; // Peizo Sounder
 int hitPin = 7; // LED output used to indicated when the player is hit
 int ammoPin = 6; // LED output for indicating remaining ammo
 int lifePin = 5; // LED output for indicating remaining life
-int motorPin = 10; // Vibrating motor output for physical feedback
+//int motorPin = 10; // Vibrating motor output for physical feedback
 
-// Game Attributes (Modify configure() to change teamNumber, ammo, and life values)
+// Game Attributes
 double currentAmmo = 0.0;
 double currentLife = 0.0;
 int triggerReading = 0;
@@ -25,9 +24,7 @@ int teamNumber = 0;
 
 void setup() {
     Serial.begin(9600);
-    irrecv.enableIRIn(); // Start the receiver
-    
-    // pin configuration
+    irrecv.enableIRIn();
     pinMode(triggerPin, INPUT_PULLUP);
     pinMode(speakerPin, OUTPUT);
     pinMode(hitPin, OUTPUT);
@@ -36,87 +33,78 @@ void setup() {
     analogWrite(ammoPin,255);
     analogWrite(lifePin,255);
     
-    configure(); // Configures player stats and team number
-    Serial.println("Configured"); // For debugging purpose
-    startTeam(); // Plays team specific melody
+    configure();
 }
 
 // Regularly checks IR signal and trigger status
 void loop() {
     receiveIR();
+    delay(10);
     checkTriggerStatus();
 }
 
-// teamNumber: 0 = Sony, 1 = Panasonic
+// Change the values based on preference
 void configure() {
     currentAmmo = 10;
     currentLife = 10;
-    teamNumber = 1; // This needs to be manually changed in order to specify different team number
-}
-
-// Different team plays different melodies
-void startTeam() {
-  if (teamNumber == 0) {
-      for (int i = 1;i < 254;i++) {
-          playTone((300+9*(i/2)), 2); // This probably won't sound good, need to fiddle with it
-      }
-  } else {
-      for (int i = 1;i < 254;i++) {
-          playTone((500+9*(i/2)), 2); // This too
-      }
-  }
+    teamNumber = 0; // 0 or 1
+    for (int i = 1;i < 254;i++) {
+        playTone((100+9*i), 2);
+    }
+    Serial.println("Configuration Completed");
 }
 
 // Receive IR signal and differenciate it
 void receiveIR() {
     if (irrecv.decode(&results)) {
         switch(results.value) {
-            case 2704: // Sony, 2704 is a placeholder number
-                Serial.println("SONY");
+            case 2704: // Sony
                 irrecv.resume();
                 playerHit(0);
                 break;
-            case 1111: // Panasonic, 1111 is a placeholder number
-                Serial.println("Panasonic");
+            case 1524048797: // NEC
                 irrecv.resume();
                 playerHit(1);
                 break;
             default:
-                Serial.println(results.value); // decode the code and display the code, if not registered
+                Serial.println(results.value); // Decode the code and display the code, if not registered
                 irrecv.resume();
         }
     }
     
-    delay(50); // To stop geting too much hit
+    delay(100); // To stop geting too much hit
 }
 
 // Update value of currentLife and make noise after being hit
 void playerHit(int typeOfSignal) {
     if (teamNumber == typeOfSignal) {
-        Serial.println("Signal from same team"); // For debuggin purpose
+        Serial.println("Signal from same team");
     } else {
         if (currentLife == 0) {
-            Serial.println("Player is Dead"); // For debuggin purpose
+            Serial.println("Player is Dead");
+            
             // Plays death melody
-            for (int i = 1;i < 254;i++) {
-                playTone((1000+9*i), 2);
+            for (int i = 254;i > 1;i--) {
+                playTone((100+9*i), 2);
             }
         } else {
-            // subtract 1 life and reconfigure the pins
+            // Subtract 1 life and reconfigure the pins
             currentLife--;
-            analogWrite(lifePin, (currentLife/30.0)*255);
-            Serial.println("Remaining life: " + currentLife); // For debuggin purpose
-            digitalWrite(hitPin, HIGH);
-            digitalWrite(motorPin, HIGH);
             playTone(400, 200);
+            Serial.println(currentLife);
+            
+            digitalWrite(hitPin, HIGH);
+            //digitalWrite(motorPin, HIGH);
             delay(200);
             digitalWrite(hitPin, LOW);
-            digitalWrite(motorPin, LOW);
+            //digitalWrite(motorPin, LOW);
+            
+            analogWrite(lifePin, (currentLife/30.0)*255);
         }
     }
 }
 
-// monitor trigger status and calls shooting method when approperiate
+// Monitor trigger status and calls shooting method when approperiate
 void checkTriggerStatus() {
     lastTriggerReading = triggerReading;
     triggerReading = digitalRead(triggerPin);
@@ -129,30 +117,31 @@ void checkTriggerStatus() {
     }
 }
 
-// Send Sony or Panasonic remote signal depending on teamNumber
+// Send Sony or NEC remote signal depending on teamNumber
 void shoot() {
-    for (int i = 0; i<4; i++) {
+    Serial.println("Shoot!");
+    for (int i = 0; i < 3; i++) {
         switch(teamNumber) {
             case 0: // Sony
                 irsend.sendSony(0xa90, 12);
                 delay(5);
                 break;
-            case 1: // Panasonic
-                irsend.sendPanasonic(0x4004, 0x100BCBD);
+            case 1: // NEC
+                irsend.sendNEC(0xa90, 12);
                 delay(5);
                 break;
             default:
                 delay(5);
         }
     }
+    playTone(400,200);
     currentAmmo--;
     analogWrite(ammoPin, (currentAmmo/30.0)*255);
-    delay(40);
-    playTone(400,200);
+    delay(50);
     irrecv.enableIRIn(); // IReciever needs to be started again after shooting
 }
 
-// reload currentAmmo
+// Reload currentAmmo
 void reload() {
   for (int i = 254;i < 1;i--) {
       playTone((1000+9*i), 2);
