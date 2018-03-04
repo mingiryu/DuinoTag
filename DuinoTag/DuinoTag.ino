@@ -13,7 +13,7 @@ int speakerPin = 4; // Peizo Sounder
 int hitPin = 7; // LED output used to indicated when the player is hit
 int ammoPin = 6; // LED output for indicating remaining ammo
 int lifePin = 5; // LED output for indicating remaining life
-//int motorPin = 10; // Vibrating motor output for physical feedback
+int motorPin = 10; // Vibrating motor output for physical feedback
 
 // Game Attributes
 double currentAmmo = 0.0;
