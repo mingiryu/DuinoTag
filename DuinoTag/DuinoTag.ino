@@ -30,6 +30,7 @@ void setup() {
     pinMode(hitPin, OUTPUT);
     pinMode(ammoPin, OUTPUT);
     pinMode(lifePin, OUTPUT);
+    pinMode(motorPin, OUTPUT);
     analogWrite(ammoPin,255);
     analogWrite(lifePin,255);
     
@@ -94,10 +95,10 @@ void playerHit(int typeOfSignal) {
             Serial.println(currentLife);
             
             digitalWrite(hitPin, HIGH);
-            //digitalWrite(motorPin, HIGH);
+            digitalWrite(motorPin, HIGH);
             delay(200);
             digitalWrite(hitPin, LOW);
-            //digitalWrite(motorPin, LOW);
+            digitalWrite(motorPin, LOW);
             
             analogWrite(lifePin, (currentLife/30.0)*255);
         }
