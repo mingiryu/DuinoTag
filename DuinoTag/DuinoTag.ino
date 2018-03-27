@@ -46,62 +46,62 @@ void loop() {
 
 // Change the values based on preference
 void configure() {
-    currentAmmo = 10;
-    currentLife = 10;
-    teamNumber = 0; // 0 or 1
+    Serial.println("Configured");
+    currentAmmo = 30;
+    currentLife = 5;
+    teamNumber = 1;
     for (int i = 1;i < 254;i++) {
         playTone((100+9*i), 2);
     }
-    Serial.println("Configuration Completed");
 }
 
 // Receive IR signal and differenciate it
 void receiveIR() {
     if (irrecv.decode(&results)) {
         switch(results.value) {
-            case 2704: // Sony
+            case 2704: // Sony, 0
                 irrecv.resume();
-                playerHit(0);
+                if (teamNumber == 0) {
+                  Serial.println("Same team");
+                } else {
+                  playerHit();
+                }
                 break;
-            case 1524048797: // NEC
+            case 1524048797: // NEC, 1
                 irrecv.resume();
-                playerHit(1);
+                if (teamNumber == 1) {
+                  Serial.println("Same team");
+                } else {
+                  playerHit();
+                }
                 break;
             default:
-                Serial.println(results.value); // Decode the code and display the code, if not registered
+                Serial.println(results.value);
                 irrecv.resume();
         }
     }
-    
-    delay(100); // To stop geting too much hit
+    delay(100);
 }
 
-// Update value of currentLife and make noise after being hit
-void playerHit(int typeOfSignal) {
-    if (teamNumber == typeOfSignal) {
-        Serial.println("Signal from same team");
-    } else {
-        if (currentLife == 0) {
-            Serial.println("Player is Dead");
-            
-            // Plays death melody
-            for (int i = 254;i > 1;i--) {
-                playTone((100+9*i), 2);
-            }
-        } else {
-            // Subtract 1 life and reconfigure the pins
-            currentLife--;
-            playTone(400, 200);
-            Serial.println(currentLife);
-            
-            digitalWrite(hitPin, HIGH);
-            digitalWrite(motorPin, HIGH);
-            delay(200);
-            digitalWrite(hitPin, LOW);
-            digitalWrite(motorPin, LOW);
-            
-            analogWrite(lifePin, (currentLife/30.0)*255);
+// Update currentLife value and pins
+void playerHit() {
+    if (currentLife == 0) {
+        Serial.println("Dead");
+        for (int i = 254;i > 1;i--) {
+            playTone((100+9*i), 2);
         }
+    } else {
+        currentLife--;
+        Serial.println(currentLife);
+        analogWrite(lifePin, (currentLife/30.0)*255);
+        digitalWrite(motorPin, HIGH);
+        for (int i = 0; i < 3; i++) {
+          digitalWrite(hitPin, HIGH);
+          delay(50);
+          digitalWrite(hitPin, LOW);
+          delay(200);
+        }
+        digitalWrite(motorPin, LOW);
     }
 }
 
@@ -110,45 +110,37 @@ void checkTriggerStatus() {
     lastTriggerReading = triggerReading;
     triggerReading = digitalRead(triggerPin);
     if(triggerReading != lastTriggerReading && triggerReading == LOW) {
-        if(currentAmmo > 0 && currentLife > 0) {
+        if(currentAmmo * currentLife != 0) {
             shoot();
-        } else if (currentAmmo <= 0 && currentLife > 0) {
-            reload();
         }
     }
 }
 
-// Send Sony or NEC remote signal depending on teamNumber
+// Send signal that corresponds to teamNumber
 void shoot() {
     Serial.println("Shoot!");
     for (int i = 0; i < 3; i++) {
-        switch(teamNumber) {
-            case 0: // Sony
-                irsend.sendSony(0xa90, 12);
-                delay(5);
-                break;
-            case 1: // NEC
-                irsend.sendNEC(0xa90, 12);
-                delay(5);
-                break;
-            default:
-                delay(5);
-        }
+      switch(teamNumber) {
+        case 0: // Sony
+            irsend.sendSony(0xa90, 12);
+            delay(5);
+            break;
+        case 1: // NEC
+            irsend.sendNEC(0xa90, 12);
+            delay(5);
+            break;
+        default:
+            delay(5);
+       }
+       digitalWrite(motorPin, HIGH);
+       delay(10);
+       digitalWrite(motorPin, LOW);
     }
-    playTone(400,200);
+    playTone(200,200);
     currentAmmo--;
     analogWrite(ammoPin, (currentAmmo/30.0)*255);
-    delay(50);
-    irrecv.enableIRIn(); // IReciever needs to be started again after shooting
-}
-
-// Reload currentAmmo
-void reload() {
-  for (int i = 254;i < 1;i--) {
-      playTone((1000+9*i), 2);
-  }
-  delay(40);
-  currentAmmo = 10;
+    irrecv.enableIRIn(); 
+    delay(10);
 }
 
 // Standard sound generator for peizo
